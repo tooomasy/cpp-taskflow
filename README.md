@@ -2,6 +2,17 @@
 
 keywords: `c++`, `multi-threading`, `concurrency`, `lock-free queue`, `lock-free stack`, `hazard pointers`, `memory pool`, `DAG`, `template`
 
+```bash
+
+ ██████╗██████╗ ██████╗    ████████╗ █████╗ ███████╗██╗  ██╗███████╗██╗      ██████╗ ██╗    ██╗
+██╔════╝██╔══██╗██╔══██╗   ╚══██╔══╝██╔══██╗██╔════╝██║ ██╔╝██╔════╝██║     ██╔═══██╗██║    ██║
+██║     ██████╔╝██████╔╝█████╗██║   ███████║███████╗█████╔╝ █████╗  ██║     ██║   ██║██║ █╗ ██║
+██║     ██╔═══╝ ██╔═══╝ ╚════╝██║   ██╔══██║╚════██║██╔═██╗ ██╔══╝  ██║     ██║   ██║██║███╗██║
+╚██████╗██║     ██║           ██║   ██║  ██║███████║██║  ██╗██║     ███████╗╚██████╔╝╚███╔███╔╝
+ ╚═════╝╚═╝     ╚═╝           ╚═╝   ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚═╝     ╚══════╝ ╚═════╝  ╚══╝╚══╝ 
+                                                                                               
+```
+
 Cpp-Taskflow is a C++ library for managing and scheduling tasks that may be dependent on one another, represented as a DAG (directed acyclic graph). The library provides a simple and efficient way to express complex task dependencies and execute them in a highly concurrent and parallel manner.
 
 ## Features
@@ -56,6 +67,15 @@ int main() {
   return 0;
 }
 ```
+This code snippet demonstrates how to schedule the order of function resolution using the `SimpleTask` class. The code defines five functions, `hello()`, `init()`, `add1(int)`, `add2(int)`, and `add3(int, int)`.
+
+In this example, we want the return value from `init()` to be passed as a parameter to `add1(int)` and `add2(int)`. To achieve this, we create a `TaskNode` object for `init()` and pass it as a dependency to the instance of `add1(int)` and `add2(int)`, the ordering of the parameters match exactly with the wrapped function signature.
+
+We also create a `TaskNode` object for `add3(int, int)` and pass `node` and `node2` as dependencies to it. Finally, we create a `TaskNode` object for `hello()` and make it depend on `node3`. We can use the `depends_on()` method to specify the dependencies between tasks. 
+
+To execute the scheduled tasks, we create a `NodeResolver` object and add all the `TaskNode` objects to it. We then call the `resolve()` method to execute the tasks in the correct order.
+
+The code outputs the result of `node3` by calling the `get_result()` method and casting the result to an `int` pointer.
 
 ## Contributing
 Cpp-Taskflow is an open-source project, and contributions are always welcome! If you have any ideas for new features, improvements, or bug fixes, please don't hesitate to submit a pull request or open an issue on the official GitHub repository.
