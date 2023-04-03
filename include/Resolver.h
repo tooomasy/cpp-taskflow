@@ -10,7 +10,7 @@
 using BaseNodePtr = std::shared_ptr<SimpleTask>;
 
 class NodeResolver {
- private:
+private:
   std::unordered_map<BaseNodePtr, std::unordered_set<BaseNodePtr>> graph;
   std::unordered_set<BaseNodePtr> nodes;
   std::queue<BaseNodePtr> roots;
@@ -21,8 +21,8 @@ class NodeResolver {
 
   void build_graph() {
     std::unordered_map<BaseNodePtr, std::unordered_set<BaseNodePtr>> new_graph;
-    for (auto& node : nodes) {
-      for (auto& depended_node : node->get_prerequisites()) {
+    for (auto &node : nodes) {
+      for (auto &depended_node : node->get_prerequisites()) {
         if (new_graph.find(depended_node) == new_graph.end()) {
           new_graph[depended_node] = std::unordered_set<BaseNodePtr>();
         }
@@ -37,7 +37,7 @@ class NodeResolver {
 
   std::queue<BaseNodePtr> build_roots() {
     std::queue<BaseNodePtr> res;
-    for (auto& node : nodes) {
+    for (auto &node : nodes) {
       if (node->get_prerequisites().size() == 0) {
         res.push(node);
       }
@@ -48,9 +48,8 @@ class NodeResolver {
   void resolve_task() {
     BaseNodePtr node;
     process_queue.wait_and_pop(node);
-    // if (!node->is_valid_branch_checking()) return;
     (*node)();
-    for (auto& child_func_node : graph[node]) {
+    for (auto &child_func_node : graph[node]) {
       child_func_node->update_prerequisites_status(node);
       bool valid = child_func_node->check_prerequisites();
       if (valid) {
@@ -60,13 +59,13 @@ class NodeResolver {
     }
   }
 
- public:
+public:
   NodeResolver(
       unsigned int max_num_thread = std::thread::hardware_concurrency() - 1)
       : thread_pool(max_num_thread) {}
 
-  void add(BaseNodePtr& node) { nodes.insert(node); }
-  void add(SimpleTask* node) {
+  void add(BaseNodePtr &node) { nodes.insert(node); }
+  void add(SimpleTask *node) {
     nodes.insert(std::shared_ptr<SimpleTask>(node));
   }
 

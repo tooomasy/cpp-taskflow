@@ -2,9 +2,12 @@
 #define __THREAD_POOL_H__
 
 #include "ThreadSafeQueue.h"
+#include <functional>
+#include <queue>
+#include <thread>
 
 class ThreadPool {
- private:
+private:
   std::queue<std::function<void()>> task_queue;
   std::vector<std::thread> threads;
 
@@ -12,16 +15,15 @@ class ThreadPool {
   std::condition_variable cv;
   bool stop = false;
 
- public:
+public:
   ThreadPool(unsigned int num_thread);
   ~ThreadPool();
 
-  template <typename T>
-  void add_task(T task);
+  template <typename T> void add_task(T task);
   void terminate();
 };
 
-ThreadPool::ThreadPool(unsigned int num_thread) {
+inline ThreadPool::ThreadPool(unsigned int num_thread) {
   for (int i = 0; i < num_thread; ++i) {
     threads.push_back(std::thread([this]() {
       while (true) {
@@ -29,7 +31,8 @@ ThreadPool::ThreadPool(unsigned int num_thread) {
         {
           std::unique_lock lk(m);
           cv.wait(lk, [this]() { return stop || !task_queue.empty(); });
-          if (stop) return;
+          if (stop)
+            return;
           task = std::move(task_queue.front());
           task_queue.pop();
         }
@@ -39,15 +42,14 @@ ThreadPool::ThreadPool(unsigned int num_thread) {
   }
 }
 
-ThreadPool::~ThreadPool() {
+inline ThreadPool::~ThreadPool() {
   terminate();
-  for (auto& thread : threads) {
+  for (auto &thread : threads) {
     thread.join();
   }
 }
 
-template <typename T>
-void ThreadPool::add_task(T task) {
+template <typename T> void ThreadPool::add_task(T task) {
   {
     std::unique_lock lk(m);
     task_queue.push([=] { task(); });
@@ -55,7 +57,7 @@ void ThreadPool::add_task(T task) {
   cv.notify_one();
 }
 
-void ThreadPool::terminate() {
+inline void ThreadPool::terminate() {
   {
     std::unique_lock<std::mutex> lk(m);
     stop = true;

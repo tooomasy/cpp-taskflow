@@ -3,25 +3,24 @@
 
 #include <atomic>
 
-template <typename T>
-class SPSCQueue {
- private:
+template <typename T> class SPSCQueue {
+private:
   struct Node {
     T val_;
-    Node* next_;
+    Node *next_;
 
     Node() : next_{nullptr} {}
     Node(T val) : val_(std::move(val)), next_{nullptr} {}
   };
 
-  std::atomic<Node*> head_ = {new Node()};
-  std::atomic<Node*> tail_ = head_.load();
+  std::atomic<Node *> head_ = {new Node()};
+  std::atomic<Node *> tail_ = head_.load();
 
   std::atomic<bool> push_in_use_ = {false};
   std::atomic<bool> pop_in_use_ = {false};
 
-  Node* pop_head() {
-    Node* old_head = head_.load();
+  Node *pop_head() {
+    Node *old_head = head_.load();
     if (old_head == tail_.load()) {
       return nullptr;
     }
@@ -29,7 +28,7 @@ class SPSCQueue {
     return old_head;
   }
 
- public:
+public:
   SPSCQueue() {}
   ~SPSCQueue() {}
 
@@ -38,17 +37,18 @@ class SPSCQueue {
       ;
   }
 
-  void pop(T& val) {
+  void pop(T &val) {
     while (!try_pop(val))
       ;
   }
 
   bool try_push(T val) {
     bool expect = false;
-    if (!push_in_use_.compare_exchange_strong(expect, true)) return false;
+    if (!push_in_use_.compare_exchange_strong(expect, true))
+      return false;
     // push_in_use_.store(true);
-    Node* new_node = new Node();
-    Node* old_tail = tail_.load();
+    Node *new_node = new Node();
+    Node *old_tail = tail_.load();
     old_tail->val_ = val;
     old_tail->next_ = new_node;
     tail_.store(new_node);
@@ -56,11 +56,11 @@ class SPSCQueue {
     return true;
   }
 
-  bool try_pop(T& val) {
+  bool try_pop(T &val) {
     bool expect = false;
-    if (!pop_in_use_.compare_exchange_strong(expect, true)) return false;
-    // pop_in_use_.store(true);
-    Node* old_head = pop_head();
+    if (!pop_in_use_.compare_exchange_strong(expect, true))
+      return false;
+    Node *old_head = pop_head();
     if (old_head == nullptr) {
       pop_in_use_.store(false);
       return false;
@@ -72,4 +72,4 @@ class SPSCQueue {
   }
 };
 
-#endif  // SPSCQUEUE_H_
+#endif // SPSCQUEUE_H_
