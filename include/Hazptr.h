@@ -74,6 +74,25 @@ inline void hazptr_holder::release_protection() {
 inline hazptr_domain::~hazptr_domain() {
   // release all hptr
   // relase all retire obj
+  {
+    hazptr_rec *hptr_head = hptr_list.load();
+    hazptr_rec *next = nullptr;
+    while (hptr_head) {
+      next = hptr_head->next_;
+      delete hptr_head;
+      hptr_head = next;
+    }
+  }
+
+  {
+    hazptr_retire_obj *retire_head = retire_list.load();
+    hazptr_retire_obj *next = nullptr;
+    while (retire_head) {
+      next = retire_head->next_;
+      delete retire_head;
+      retire_head = next;
+    }
+  }
 }
 
 inline hazptr_rec *hazptr_domain::acquire_hazptr() {
@@ -96,7 +115,6 @@ inline void hazptr_domain::retire(hazptr_retire_obj *reclaim_obj) {
 }
 
 inline void hazptr_domain::reclaim_if_reach_threshold() {
-  //
   hazptr_rec *cur = hptr_list.load();
   std::unordered_set<const void *> raw_ptr_set;
   while (cur) {
