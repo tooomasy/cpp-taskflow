@@ -5,17 +5,10 @@
 
 /**
  * TODO:
- * - ~handle void return type~
  * - memory leak
  * - solve the raw & smart pointer issue
- *
  * - revise copy
- *
- * - ~thread pool~
- * - ~Lock-free queue~
  * - rewrite ThreadSafeQueue;
- * - ~Small object allcator~
- *
  * - loop
  * - conditions
  * - supports lambda

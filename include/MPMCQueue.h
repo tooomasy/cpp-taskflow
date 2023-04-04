@@ -7,6 +7,11 @@
 
 #include "SPSCQueue.h"
 
+/**
+ * TODO:
+ * - benchmark
+ */
+
 template <typename T> class MPMCQueue {
 private:
   unsigned max_threads_;

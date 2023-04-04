@@ -7,6 +7,11 @@
 #include "ThreadPool.h"
 #include "ThreadSafeQueue.h"
 
+/**
+ * TODO:
+ *  - add a version that use lock-free queue
+ */
+
 using BaseNodePtr = std::shared_ptr<SimpleTask>;
 
 class NodeResolver {
