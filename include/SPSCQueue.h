@@ -6,6 +6,7 @@
 /**
  * TODO:
  * - benchmark
+ * - revamp
  */
 
 template <typename T> class SPSCQueue {

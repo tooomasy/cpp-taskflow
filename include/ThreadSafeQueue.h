@@ -86,7 +86,7 @@ public:
     return (old_head != nullptr);
   }
 
-  void wait_and_pop(T &value) {
+  void pop(T &value) {
     std::unique_lock<std::mutex> lock(wait_for_data());
     value = std::move(*head_->data);
     pop_head();
