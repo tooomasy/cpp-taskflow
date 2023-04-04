@@ -3,6 +3,12 @@
 
 #include <atomic>
 
+/**
+ * TODO:
+ * - benchmark
+ * - revamp
+ */
+
 template <typename T> class SPSCQueue {
 private:
   struct Node {

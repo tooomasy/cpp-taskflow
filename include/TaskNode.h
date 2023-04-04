@@ -65,6 +65,8 @@ template <typename ReturnType>
 class TaskNode : public SimpleTask,
                  public MemoryPoolMixin<TaskNode<ReturnType>> {
 private:
+  friend class Resolver;
+
   struct Metadata {
     bool is_ready = false;
   };
@@ -91,6 +93,22 @@ private:
       this->depends_on(first);
     }
     this->add_strickly_depended_node(rest...);
+  }
+
+  std::unordered_set<BaseNodePtr> &get_prerequisites() override {
+    return prerequisites_nodes;
+  }
+
+  bool check_prerequisites() override {
+    for (auto &pair : prerequisites_info) {
+      if (pair.second->is_ready == false)
+        return false;
+    }
+    return true;
+  }
+
+  void update_prerequisites_status(BaseNodePtr &node) override {
+    prerequisites_info[node]->is_ready = true;
   }
 
 public:
@@ -130,22 +148,6 @@ public:
     BaseNodePtr node_ptr = std::shared_ptr<SimpleTask>(node);
     prerequisites_nodes.insert(node_ptr);
     prerequisites_info[node_ptr] = std::make_shared<Metadata>();
-  }
-
-  std::unordered_set<BaseNodePtr> &get_prerequisites() override {
-    return prerequisites_nodes;
-  }
-
-  bool check_prerequisites() override {
-    for (auto &pair : prerequisites_info) {
-      if (pair.second->is_ready == false)
-        return false;
-    }
-    return true;
-  }
-
-  void update_prerequisites_status(BaseNodePtr &node) override {
-    prerequisites_info[node]->is_ready = true;
   }
 };
 

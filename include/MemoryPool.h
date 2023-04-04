@@ -5,6 +5,13 @@
 #include <memory>
 #include <vector>
 
+/**
+ * TODO:
+ * - Optimize the structure
+ * - re-design
+ *
+ */
+
 constexpr int NUM_OF_CHUNKS = 8;
 constexpr int GROW_SIZE = 1000;
 constexpr int MIN_BLOCK_SIZE_SHIFT = 3;

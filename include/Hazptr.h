@@ -4,6 +4,12 @@
 #include <atomic>
 #include <unordered_set>
 
+/**
+ * TODO:
+ *  - use TLS
+ *  - reuse available nodes
+ */
+
 struct hazptr_holder;
 struct hazptr_domain;
 template <typename T> struct hazptr_obj_base;
