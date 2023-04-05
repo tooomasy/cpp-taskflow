@@ -1,6 +1,7 @@
 #ifndef __RESOLVER_H__
 #define __RESOLVER_H__
 
+#include <condition_variable>
 #include <queue>
 
 #include "LockFreeStack.h"
@@ -23,6 +24,11 @@ private:
   std::unordered_map<BaseNodePtr, std::unordered_set<BaseNodePtr>> graph;
   std::unordered_set<BaseNodePtr> nodes;
   std::queue<BaseNodePtr> roots;
+
+  std::unordered_set<BaseNodePtr> end_nodes;
+  int end_nodes_count = 0;
+  std::mutex end_nodes_mutex;
+  std::condition_variable end_nodes_cv;
 
   TaskQueue process_queue;
   ThreadPool thread_pool;
@@ -56,7 +62,15 @@ private:
   void resolve_task() {
     BaseNodePtr node;
     process_queue.pop(node);
-    (*node)();
+
+    (*node)(); // execute the node task
+
+    if (end_nodes.find(node) != end_nodes.end()) {
+      std::unique_lock lk(end_nodes_mutex);
+      --end_nodes_count;
+      end_nodes_cv.notify_all();
+    }
+
     for (auto &child_func_node : graph[node]) {
       child_func_node->update_prerequisites_status(node);
       bool valid = child_func_node->check_prerequisites();
@@ -65,6 +79,16 @@ private:
         thread_pool.add_task([this] { this->resolve_task(); });
       }
     }
+  }
+
+  int find_number_of_end_nodes(
+      std::unordered_map<BaseNodePtr, std::unordered_set<BaseNodePtr>> &graph) {
+    for (auto &[node, node_list] : graph) {
+      if (node_list.size() == 0) {
+        end_nodes.insert(node);
+      }
+    }
+    return end_nodes.size();
   }
 
 public:
@@ -77,14 +101,25 @@ public:
     nodes.insert(std::shared_ptr<SimpleTask>(node));
   }
 
-  void resolve() {
+  void resolve_async() {
     build_graph();
     std::queue<BaseNodePtr> next = build_roots();
+    end_nodes_count = find_number_of_end_nodes(graph);
     while (!next.empty()) {
       process_queue.push(next.front());
       thread_pool.add_task([this] { this->resolve_task(); });
       next.pop();
     }
+  }
+
+  void join() {
+    std::unique_lock lk(end_nodes_mutex);
+    end_nodes_cv.wait(lk, [&] { return end_nodes_count == 0; });
+  }
+
+  void resolve_sync() {
+    resolve_async();
+    join();
   }
 };
 

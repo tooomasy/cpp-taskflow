@@ -17,13 +17,6 @@
 
 void hello() { std::cout << "Hello world\n"; }
 
-struct test {
-  int init() { return 100; }
-  int add1(int x) { return x + 10; }
-  int add2(int x) { return x + 20; }
-  int add3(int x, int y) { return x + y; }
-};
-
 int init() { return 100; }
 int add1(int x) { return x + 10; }
 int add2(int x) { return x + 20; }
@@ -48,7 +41,7 @@ int main() {
   resolver.add(node3);
   resolver.add(extra);
 
-  resolver.resolve();
+  resolver.resolve_sync();
   std::printf("result: %d\n", *((int *)node3->get_result()));
 
   return 0;
