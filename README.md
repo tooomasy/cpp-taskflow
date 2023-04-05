@@ -61,7 +61,9 @@ int main() {
   resolver.add(node3);
   resolver.add(extra);
 
-  resolver.resolve();
+  resolver.resolve_sync();
+  // if you want to resolve the tasks asynchronously
+  // resolver.resolve_async(); 
   std::printf("result: %d\n", *((int*)node3->get_result())); // output: 230
 
   return 0;
